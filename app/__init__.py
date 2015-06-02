@@ -2,7 +2,7 @@
 import os,sys
 from flask import Flask
 from flask.ext.login import LoginManager
-from flask.ext.bootstrap import Bootstrap
+#from flask.ext.bootstrap import Bootstrap
 #from config import load_config
 from flask.ext.mongoengine import MongoEngine
 
