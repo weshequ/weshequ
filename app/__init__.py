@@ -17,7 +17,7 @@ login_manager = LoginManager()
 
 def create_app():
     app=Flask(__name__)
-    Bootstrap(app)
+    #Bootstrap(app)
     app.config.from_object('config')
     login_manager.init_app(app)
     db.init_app(app)
