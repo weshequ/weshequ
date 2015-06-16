@@ -1,14 +1,13 @@
-import datetime
-from flask import url_for
-from app import db
+class Village(db.Document):
+    Name=db.StringField(required=True)
+    Region=db.PolygonField()
 
-
-class comment(db.EmbeddedDocument):
+class comment(db.Document):
     created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
-    body = db.StringField(verbose_name="Comment", required=True)
-    author = db.StringField(verbose_name="Name", max_length=255, required=True)
+    body = db.StringField(required=True)
+    author = db.StringField(max_length=255, required=True)
 
-class good(db.EmbeddedDocument):
+class good(db.Document):
     name=db.StringField(max_length=255,required=True)
     image=db.StringField(required=True)
     charge=db.FloatField(required=True)
@@ -17,29 +16,44 @@ class good(db.EmbeddedDocument):
     sold_number=db.IntField(required=True,default=0)
     thumbsup=db.IntField(default=0,required=True)
     thumbsdown=db.IntField(default=0,required=True)
-    comments=db.ListField(db.EmbeddedDocumentField('comment'))
+    comments=db.ListField(db.RefenceField(comment))
 
+    meta = {
+        'indexes': [
+            {
+                'fields': ['created_at']
+            }
+        ]
+    }
 
 class shop(db.Document):
     name=db.StringField(max_length=255,required=True)
     logo=db.StringField(max_length=255,required=True)
+    village=db.ReferenceField(Village)
     address=db.StringField(max_length=255,required=True)
-    descript=db.StringField(required=True)
-    information=db.StringField(required=True)
-    contact=db.StringField(required=True)
-    number_of_goods=db.IntField(required=True)
-    threadshold=db.IntField(required=True)
-    deliver_time=db.ListField(db.StringField(),required=True)
-    owner=db.StringField(required=True)
-    goods=db.ListField(db.EmbeddedDocumentField('good'),default=[])
+    description=db.StringField(required=True)
+    information=db.StringField(required=True,default='')
+    contact=db.StringField(required=True,default='')
+    number_of_goods=db.IntField(required=True,default=30)
+    threadshold=db.IntField(required=True,default=20)
+    deliver_time=db.ListField(db.StringField(),required=True,default=[])
+    owner=db.ReferenceField(User,required=True)
+    created_at=db.DateTimeField(default=datetime.datetime.now, required=True)
+    goods=db.ListField(db.ReferenceField('good'))
+    thumbsup=db.IntField(default=0,required=True)
+    thumbsdown=db.IntField(default=0,required=True)
 
+    meta = {
+        'indexes': [
+            {
+                'fields': ['created_at']
+            }
+        ]
+    }
 
-class test(db.Document):
-    name=db.StringField(required=True)
-    created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
 
 class User(db.Document):
-    nickname = db.StringField(max_length=255,unique = True,required=True)
+    name = db.StringField(max_length=255,unique = True,required=True)
     password=db.StringField(required=True)
     email = db.EmailField(unique = True)
     login_times=db.IntField(required=True,default=0)
@@ -60,27 +74,17 @@ class User(db.Document):
     def __repr__(self):
         return '<User %r>' % (self.nickname)
 
-# class shopcarts(db.Document):
-#     buyer
-#     shop
-#     items(
-#         goodsid
-#         goodsname
-#         is_commented
-#         is_add_commented
-#         is_send_back
-#     )
-#     sum_of_charge
-#     deliver_time 
-#     state(buy,prepare,send,incharge,finished)
+class cartsitem(db.Document):
+    good=db.ReferenceField(good)
+    is_commented=db.BooleanField()
+    is_add_commented=db.BooleanField()
 
-# class user
-#     name
-#     address
-#     contact
-#     logo
-#     history_payment
-#     in_proceed_payment
-#     goodstatement
-#     is_seller
-#     imbed_carts
+CARTSSTATE = ('deal', 'prepare', 'send', 'incharge', 'finished')
+
+class shopcarts(db.Document):
+     buyer=db.ReferenceField(User,required=True)
+     shop=db.ReferenceField(shop,required=True)
+     items=db.ListField(db.ReferenceField(cartsitem))
+     sum_of_charge=db.IntField()
+     deliver_time=db.StringField()
+     state=db.StringField(choices=CARTSSTATE)
