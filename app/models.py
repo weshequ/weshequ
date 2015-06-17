@@ -84,7 +84,7 @@ class cartsitem(db.Document):
 CARTSSTATE = ('deal', 'prepare', 'send', 'incharge', 'finished')
 
 class shopcarts(db.Document):
-     buyer=db.ReferenceField(User,required=True)
+     buyer=db.ReferenceField(user,required=True)
      shop=db.ReferenceField(shop,required=True)
      items=db.ListField(db.ReferenceField(cartsitem))
      sum_of_charge=db.IntField()
