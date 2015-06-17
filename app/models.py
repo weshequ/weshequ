@@ -1,6 +1,9 @@
+import datetime
+from app import db
+
 class Village(db.Document):
-    Name=db.StringField(required=True)
-    Region=db.PolygonField()
+    name=db.StringField(required=True)
+    region=db.PolygonField()
 
 class comment(db.Document):
     created_at = db.DateTimeField(default=datetime.datetime.now, required=True)
@@ -16,7 +19,7 @@ class good(db.Document):
     sold_number=db.IntField(required=True,default=0)
     thumbsup=db.IntField(default=0,required=True)
     thumbsdown=db.IntField(default=0,required=True)
-    comments=db.ListField(db.RefenceField(comment))
+    comments=db.ListField(db.ReferenceField(comment))
 
     meta = {
         'indexes': [
@@ -26,33 +29,7 @@ class good(db.Document):
         ]
     }
 
-class shop(db.Document):
-    name=db.StringField(max_length=255,required=True)
-    logo=db.StringField(max_length=255,required=True)
-    village=db.ReferenceField(Village)
-    address=db.StringField(max_length=255,required=True)
-    description=db.StringField(required=True)
-    information=db.StringField(required=True,default='')
-    contact=db.StringField(required=True,default='')
-    number_of_goods=db.IntField(required=True,default=30)
-    threadshold=db.IntField(required=True,default=20)
-    deliver_time=db.ListField(db.StringField(),required=True,default=[])
-    owner=db.ReferenceField(User,required=True)
-    created_at=db.DateTimeField(default=datetime.datetime.now, required=True)
-    goods=db.ListField(db.ReferenceField('good'))
-    thumbsup=db.IntField(default=0,required=True)
-    thumbsdown=db.IntField(default=0,required=True)
-
-    meta = {
-        'indexes': [
-            {
-                'fields': ['created_at']
-            }
-        ]
-    }
-
-
-class User(db.Document):
+class user(db.Document):
     name = db.StringField(max_length=255,unique = True,required=True)
     password=db.StringField(required=True)
     email = db.EmailField(unique = True)
@@ -72,7 +49,32 @@ class User(db.Document):
         return unicode(self.id)
 
     def __repr__(self):
-        return '<User %r>' % (self.nickname)
+        return '<User %r>' % (self.name)
+
+class shop(db.Document):
+    name=db.StringField(max_length=255,required=True)
+    logo=db.StringField(max_length=255,required=True)
+    village=db.ReferenceField(Village)
+    address=db.StringField(max_length=255,required=True)
+    description=db.StringField(required=True)
+    information=db.StringField(required=True,default='')
+    contact=db.StringField(required=True,default='')
+    number_of_goods=db.IntField(required=True,default=30)
+    threadshold=db.IntField(required=True,default=20)
+    deliver_time=db.ListField(db.StringField(),required=True,default=[])
+    owner=db.ReferenceField(user,required=True)
+    created_at=db.DateTimeField(default=datetime.datetime.now, required=True)
+    goods=db.ListField(db.ReferenceField('good'))
+    thumbsup=db.IntField(default=0,required=True)
+    thumbsdown=db.IntField(default=0,required=True)
+
+    meta = {
+        'indexes': [
+            {
+                'fields': ['created_at']
+            }
+        ]
+    }
 
 class cartsitem(db.Document):
     good=db.ReferenceField(good)
